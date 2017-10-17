@@ -29,3 +29,8 @@ written in C, brought to life by [löve](https://love2d.org).
     and rename it to, say, `kwarto.love`
     (command line: `zip -9r kwarto.love .`),
     and then double-clicking this file is supposed to work
+
+*   yet another possibility is to use
+    [ZeroBrane Studio](https://studio.zerobrane.com):
+    open `main.lua`, and from ‘Menu’|‘Project’ choose
+    ‘Project Directory’|‘Set From Current File’ and ‘Lua Interpreter’|‘LÖVE’
