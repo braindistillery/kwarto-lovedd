@@ -137,18 +137,15 @@ local reset = function()
 		local r = math.random(i)
 		locat[r], locat[i] = i, locat[r]
 	end
-
 	-- put pieces in the real stock
 	for i, l in ipairs(locat) do
 		stock[l] = i
 	end
+	-- empty the board and the stage
 	for l = -16, 0 do
 		stock[l] = 0
 	end
-
-	-- restore alpha values and empty the board
 	for i = 1, 16 do
-		alpha[-i] = 255
 		board[i] = hex[0]
 	end
 	-- more (re)initialization
@@ -275,11 +272,13 @@ local function action(k)
 			return
 		end
 		mode = bit.bxor(mode, 1)
-		_z = string.char(bit.bxor(string.byte(_z), 1))
+		stock[k] = nil
+		k = string.char(bit.bxor(string.byte(k), 1))
 			-- just be thankful for string.byte('x') being even
-		coord[_z], coord[k] = coord[k]
-		local x, y = unpack(coord[_z])
-		ckeys[x][y] = _z
+		stock[k] = k
+		local x, y = unpack(coord[k])
+		ckeys[x][y] = k
+		_z = k
 		return
 	end
 end
@@ -302,11 +301,11 @@ function love.load(a)
 	end
 	hex[0] = '.'
 
-	local g = love.graphics
-	g.setBackgroundColor(255, 255, 225, 128)
+	local G = love.graphics
+	G.setBackgroundColor(255, 255, 225, 128)
 
 	-- images, coordinates and static stock elements (unaffected by reset)
-	local _i = function(n)
+	local _im = function(n)
 		return string.format('images/%s.png', n)
 	end
 
@@ -321,14 +320,14 @@ function love.load(a)
 
 	y = u*6 + v*2 + h
 	for i = 1, 16 do
-		image[i] = g.newImage(_i(hex[i]))
+		image[i] = G.newImage(_im(hex[i]))
 		coord[i] = { (i-1)*u + x, y }
 	end
 
 	y = u*5 + v*1 + h
 	local i = -2
 	for k in string.gmatch('ouxyz', '%a') do
-		image[k] = g.newImage(_i(k))
+		image[k] = G.newImage(_im(k))
 		local l = math.floor(i*(2/3) + 3)  -- to have { 1, 2, 3, 3, 4 }
 		coord[k] = { (l-1)*u + x, y }
 		stock[k] = k
@@ -353,6 +352,8 @@ function love.load(a)
 		ckeys[x] = t
 		alpha[k] = 255
 	end
+	coord.x = coord.y
+	stock.x = nil
 	alpha.x = 255
 
 	math.randomseed(os.time())
@@ -375,18 +376,15 @@ end
 
 
 function love.draw()
-	local g = love.graphics
+	local G = love.graphics
 	local h = dimen_half
 	local s = scale
-	for k, z in pairs(coord) do
-		local i = stock[k]
-		if i then
-			local x, y = unpack(z)
-			g.setColor(255, 255, 255, alpha[k])
-			g.draw(image[i], x, y, 0, s, s, h, h)
-		end
+	for k, i in pairs(stock) do
+		local x, y = unpack(coord[k])
+		G.setColor(255, 255, 255, alpha[k])
+		G.draw(image[i], x, y, 0, s, s, h, h)
 	end
-	g.setColor(255, 255, 255, 255)
+	G.setColor(255, 255, 255, 255)
 	love.timer.sleep(.10)  -- don't need all 60 fps
 end
 
