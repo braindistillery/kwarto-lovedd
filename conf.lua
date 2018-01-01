@@ -29,6 +29,10 @@ function love.conf(t)
 	w.fullscreen	= false
 	w.fullscreentype	= 'desktop'
 
+	w.width		= 900
+	w.height	= 480
+	w.borderless	= true
+
 	m.event		= true
 	m.graphics	= true
 	m.image		= true
@@ -36,6 +40,7 @@ function love.conf(t)
 	m.mouse		= true
 	m.system	= true
 	m.timer		= true
+	m.touch		= true
 	m.window	= true
  --]]
 
@@ -43,9 +48,6 @@ function love.conf(t)
 	t.accelerometerjoystick	= false
 
 	w.title		= 'kwarto'
-	w.width		= 900
-	w.height	= 450
-	w.borderless	= true
 
 	m.audio		= false
 	m.sound		= false
@@ -53,5 +55,4 @@ function love.conf(t)
 	m.physics	= false
 	m.joystick	= false
 	m.keyboard	= false
-	m.touch		= false
 end

@@ -12,16 +12,17 @@ local ffi = require('ffi')
 ffi.cdef(
 [[
 	int kwarto_set_mode(const int);
-	int kwarto_initialize(const int);
+	int kwarto_initialize(const int, char *);
 	int kwarto_reset(void);
 	int kwarto_input_board(char *);
 	int kwarto_group_masks(void);
 	int kwarto_solve(int);
 ]]
 )
-local lib = ffi.load(string.format('./kwarto_%s.%s', ffi.arch,
-	ffi.os == 'Linux' and 'so' or 'dll'))
-	-- more detailed discussion later
+local lib
+
+local arm
+
 
 local bit = require('bit')
 
@@ -101,7 +102,10 @@ local solve = function()
 	if mode >= 0 then
 		lib.kwarto_set_mode(mode)
 		mode = mode - 2
-		lib.kwarto_initialize(os.time())
+		local d = ffi.new('char[?]', 4096)
+		local p = arm and love.filesystem.getRealDirectory('main.lua') or '.'
+		ffi.copy(d, table.concat({p, 'data', ''}, '/'))
+		lib.kwarto_initialize(os.time(), d)
 		setup()
 	end
 
@@ -288,13 +292,45 @@ end
 local dimen_unit = 50
 local dimen_half = dimen_unit*.5
 local dimen_left
-local scale = 1.
+local scale = 1.  -- TODO (hi res)
 
 
 function love.load(a)
 	if a[table.getn(a)] == '-debug' then  -- zbs
 		require('mobdebug').start()
 	end
+
+	local  supported = {
+		['x64'] = true,
+		['arm'] = true,
+	}
+	if not supported[ffi.arch] then
+		-- TODO
+		love.quit()
+	end
+
+	local extn = ffi.os == 'Linux' and 'so' or 'dll'
+	local osep = '/'  -- TODO
+	local name = string.format('%s_%s.%s', 'kwarto', ffi.arch, extn)
+	local libn = table.concat({'libs', name}, osep)
+	local libp
+	if ffi.arch == 'arm' then
+		arm = true
+		-- workaround
+		local lfs = love.filesystem
+		local f
+		f = io.open(table.concat({lfs.getRealDirectory('main.lua'), libn}, osep), 'rb')
+		local d = f:read('*all')
+		f:close()
+		local p = table.concat({lfs.getSaveDirectory(), name}, osep)
+		f = io.open(p, 'wb')
+		f:write(d)
+		f:close()
+		libp = p
+	else
+		libp = table.concat({'.', libn}, osep)
+	end
+	lib = ffi.load(libp)
 
 	for i = 1, 16 do
 		hex[i] = bit.tohex(i-1, 1)
@@ -309,14 +345,24 @@ function love.load(a)
 		return string.format('images/%s.png', n)
 	end
 
-	local x, y = 900, 450
-	love.window.setMode(x, y, { borderless = true })
---	x, y = love.window.getMode()
 	local u, h = dimen_unit, dimen_half
-	x = x*.5 - u*8
+	local x, y
+	if arm then
+		x, y = love.window.getMode()
+	else
+		x, y = 900, 480
+	end
+	love.window.setMode(x, y, { borderless=true })
+	x = x*.5 - u*8  -- (x - u*16)/2
 	dimen_left = x
 	x = x + h
-	local v = y*.5 - u*4
+
+	local v = y*.5 - u*4  -- (y - u*(1+4+1+1+1))/2
+	h = h + v
+	v = v < u and v or u
+	--	min(v, u)
+	h = h - v
+	--	h == dimen_half + (y - u*8 - v*2)/2 at this point
 
 	y = u*6 + v*2 + h
 	for i = 1, 16 do
