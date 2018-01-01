@@ -183,6 +183,7 @@ get_stock = function(t)
 	end
 	setup()
 	set_stage(t)
+if arm then return end
 	if count ~= 15 then
 		return
 	end
@@ -198,6 +199,7 @@ set_board = function(i)
 	b_map = bit.bxor(b_map, bit.lshift(1, i))
 	count = count + 1
 	setup()
+if arm then return end
 	if count ~= 15 or masks ~= 0 then
 		return
 	end
@@ -289,10 +291,10 @@ end
 
 
 
-local dimen_unit = 50
-local dimen_half = dimen_unit*.5
+local dimen_unit
+local dimen_half
 local dimen_left
-local scale = 1.  -- TODO (hi res)
+local scale
 
 
 function love.load(a)
@@ -345,22 +347,29 @@ function love.load(a)
 		return string.format('images/%s.png', n)
 	end
 
-	local u, h = dimen_unit, dimen_half
+	local u
+	local h
+	local s
 	local x, y
 	if arm then
 		x, y = love.window.getMode()
+		u = math.floor(x/(1+16+1))
+		s = (u/50)*1.1
 	else
 		x, y = 900, 480
+		u = 50
+		s = 1.
 	end
 	love.window.setMode(x, y, { borderless=true })
+	h = u*.5
+	dimen_unit, dimen_half, scale = u, h, s
 	x = x*.5 - u*8  -- (x - u*16)/2
 	dimen_left = x
 	x = x + h
 
 	local v = y*.5 - u*4  -- (y - u*(1+4+1+1+1))/2
 	h = h + v
-	v = v < u and v or u
-	--	min(v, u)
+	v = v < u and v or u  -- min(v, u)
 	h = h - v
 	--	h == dimen_half + (y - u*8 - v*2)/2 at this point
 
