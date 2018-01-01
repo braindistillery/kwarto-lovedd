@@ -46,10 +46,10 @@ Instructions for PC, see the section below for Android.
     [love-10.0.2-android.apk](https://bitbucket.org/rude/love/downloads/love-0.10.2-android.apk)
 
 *   create the directory `/sdcard/lovegame` on the device
-    (löve will search there for the file named `main.lua`).
+    (löve will search there for the file named `main.lua`)
 
 *   download into that directory (or download and copy there)
     the files `main.lua`, `conf.lua`, the directories
-    `data`, `images` and `libs` (x64 libraries are not needed here).
+    `data`, `images` and `libs` (x64 libraries are not needed here)
 
 *   launch ‘LÖVE for Android’
