@@ -183,7 +183,7 @@ get_stock = function(t)
 	end
 	setup()
 	set_stage(t)
-if arm then return end
+	if arm then return end
 	if count ~= 15 then
 		return
 	end
@@ -199,7 +199,7 @@ set_board = function(i)
 	b_map = bit.bxor(b_map, bit.lshift(1, i))
 	count = count + 1
 	setup()
-if arm then return end
+	if arm then return end
 	if count ~= 15 or masks ~= 0 then
 		return
 	end
@@ -354,11 +354,11 @@ function love.load(a)
 	if arm then
 		x, y = love.window.getMode()
 		u = math.floor(x/(1+16+1))
-		s = (u/50)*1.1
+		s = (u/100)*1.125
 	else
-		x, y = 900, 480
 		u = 50
-		s = 1.
+		s = (u/100)*1.
+		x, y = u*(1+16+1), u*(1+4+1+1+1) + 40*2
 	end
 	love.window.setMode(x, y, { borderless=true })
 	h = u*.5
