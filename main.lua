@@ -295,6 +295,7 @@ local dimen_unit
 local dimen_half
 local dimen_left
 local scale
+local dimen_offs
 
 
 function love.load(a)
@@ -363,6 +364,7 @@ function love.load(a)
 	love.window.setMode(x, y, { borderless=true })
 	h = u*.5
 	dimen_unit, dimen_half, scale = u, h, s
+	dimen_offs = h/s
 	x = x*.5 - u*8  -- (x - u*16)/2
 	dimen_left = x
 	x = x + h
@@ -432,12 +434,12 @@ end
 
 function love.draw()
 	local G = love.graphics
-	local h = dimen_half
 	local s = scale
+	local o = dimen_offs
 	for k, i in pairs(stock) do
 		local x, y = unpack(coord[k])
 		G.setColor(255, 255, 255, alpha[k])
-		G.draw(image[i], x, y, 0, s, s, h, h)
+		G.draw(image[i], x, y, 0, s, s, o, o)
 	end
 	G.setColor(255, 255, 255, 255)
 	love.timer.sleep(.10)  -- don't need all 60 fps
