@@ -147,7 +147,9 @@ local reset = function()
 		stock[l] = i
 	end
 	--]]
-	-- from the complementary four-bit Gray code 01326457fecd9ba8
+
+	-- from the complementary four-bit Gray code 01326457fecd9ba8, cf.
+	-- the standard 01326754cdfeab98 or balanced 013bf75462aecd98
 	local p = {
 		0x0, 0xe, 0x3, 0xd, 0x6, 0xb, 0x5, 0x8,
 		0xf, 0x1, 0xc, 0x2, 0x9, 0x4, 0xa, 0x7,
@@ -307,10 +309,12 @@ end
 
 
 
+local fidth = true
+local dsize = 100/1
+local scale
 local dimen_unit
 local dimen_half
 local dimen_left
-local scale
 local dimen_offs
 
 
@@ -320,6 +324,7 @@ function love.load(a)
 	end
 
 	local  supported = {
+		['x86'] = true,
 		['x64'] = true,
 		['arm'] = true,
 	}
@@ -361,43 +366,48 @@ function love.load(a)
 
 	-- images, coordinates and static stock elements (unaffected by reset)
 	local _im = function(n)
-		return string.format('images/%s.png', n)
+		return table.concat({'images', string.format('%s.png', n)}, osep)
 	end
 
-	local u
-	local h
-	local s
+	local u, v
 	local x, y
 	if arm then
 		x, y = love.window.getMode()
-		u = math.floor(x/(1+16+1))
-		s = (u/100)*1.125
+		u = fidth and math.floor(x/(1+16+1)) or math.floor(y/8)
 	else
 		u = 50
-		s = (u/100)*1.
 		x, y = u*(1+16+1), u*(1+4+1+1+1) + 40*2
 	end
 	love.window.setMode(x, y, { borderless=true })
-	h = u*.5
+	local h = u/2
+	local s = u/dsize
 	dimen_unit, dimen_half, scale = u, h, s
-	dimen_offs = h/s
-	x = x*.5 - u*8  -- (x - u*16)/2
-	dimen_left = x
-	x = x + h
+	dimen_offs = dsize/2  -- == h/s
 
-	local v = y*.5 - u*4  -- (y - u*(1+4+1+1+1))/2
-	h = h + v
-	v = v < u and v or u  -- min(v, u)
-	h = h - v
-	--	h == dimen_half + (y - u*8 - v*2)/2 at this point
+	if fidth then
+		x = (x - u*16)/2
+		dimen_left = x
+		x = x + h  -- horizontal offset
+		v = (y - u*(1+4+1+1+1))/2
+		h = h + v
+		v = v < u and v or u  -- min(u, v)
+		h = h - v
+			-- at this point h == dimen_half + (y - u*8 - v*2)/2
+			-- used as vertical offset
+	else
+		dimen_left = h
+		x = u
+		v = (y - u*(8-1))/2
+		h = 0
+	end
 
-	y = u*6 + v*2 + h
+	y = u*6 + v*2 + h  -- bottom line
 	for i = 1, 16 do
 		image[i] = G.newImage(_im(hex[i]))
 		coord[i] = { (i-1)*u + x, y }
 	end
 
-	y = u*5 + v*1 + h
+	y = u*5 + v*1 + h  -- middle
 	local i = -2
 	for k in string.gmatch('ouxyz', '%a') do
 		image[k] = G.newImage(_im(k))
@@ -410,6 +420,7 @@ function love.load(a)
 	coord[0], coord.o = coord.o
 	stock[0], stock.o = stock.o
 
+	-- square
 	for i = 1, 4 do
 		local l = 1 - i
 		for j = 1, 4 do
@@ -438,8 +449,20 @@ function love.mousereleased(x, y, button)
 	if button ~= 1 then
 		return
 	end
+	local h = dimen_half
+	--[[
+	-- visit stock elements for coordinates that match
+	for k in pairs(stock) do
+		local u, v = unpack(coord[k])
+		if math.abs(u - x) < h and math.abs(v - y) < h then
+			return action(k)
+		end
+	end
+	--]]
+	-- visit stock elements in one column only (find out first)
 	local u, h, l = dimen_unit, dimen_half, dimen_left
-	x = math.floor((x - l)/u)*u + l + h
+	x = fidth and math.floor((x - l)/u)*u + l + h or math.floor((x + h)/u)*u
+		-- same result, less math for fit hi (l == h == u/2)
 	for v, k in pairs(ckeys[x] or {}) do
 		if stock[k] and math.abs(v - y) < h then
 			return action(k)
