@@ -135,6 +135,7 @@ end
 
 
 local reset = function()
+	--[[
 	-- shuffle
 	locat[1] = 1
 	for i = 2, 16 do
@@ -144,6 +145,21 @@ local reset = function()
 	-- put pieces in the real stock
 	for i, l in ipairs(locat) do
 		stock[l] = i
+	end
+	--]]
+	-- from the complementary four-bit Gray code 01326457fecd9ba8
+	local p = {
+		0x0, 0xe, 0x3, 0xd, 0x6, 0xb, 0x5, 0x8,
+		0xf, 0x1, 0xc, 0x2, 0x9, 0x4, 0xa, 0x7,
+	}
+	local x = math.random(16) - 1
+	local k = math.random(16)
+	for l = 1, 16 do
+		stock[l] = bit.bxor(p[k], x) + 1
+		k = k < 16 and k + 1 or 1
+	end
+	for l, i in ipairs(stock) do
+		locat[i] = l
 	end
 	-- empty the board and the stage
 	for l = -16, 0 do
