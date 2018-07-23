@@ -43,13 +43,14 @@ Instructions for PC, see the section below for Android.
 *   install löve from the store:
     [org.love2d.android](https://play.google.com/store/apps/details?id=org.love2d.android)
     or manually:
-    [love-10.0.2-android.apk](https://bitbucket.org/rude/love/downloads/love-0.10.2-android.apk)
+    [love-11.1-android.apk](https://bitbucket.org/rude/love/downloads/love-11.1-android.apk)
 
 *   create the directory `/sdcard/lovegame` on the device
-    (löve will search there for the file named `main.lua`)
+    (löve will search there for the file named `main.lua`);
+    note that in a file manager the directory `/sdcard/` may appear simply as ‘Internal storage’
 
 *   download into that directory (or download and copy there)
     the files `main.lua`, `conf.lua`, the directories
-    `data`, `images` and `libs` (x64 libraries are not needed here)
+    `data`, `images` and `libs` (only the arm library is needed here)
 
 *   launch ‘LÖVE for Android’
