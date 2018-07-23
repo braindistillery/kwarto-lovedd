@@ -51,6 +51,6 @@ Instructions for PC, see the section below for Android.
 
 *   download into that directory (or download and copy there)
     the files `main.lua`, `conf.lua`, the directories
-    `data`, `images` and `libs` (only the arm library is needed here)
+    `data`, `images` and `libs` (only the `kwarto_arm.so` library is needed here)
 
 *   launch ‘LÖVE for Android’
