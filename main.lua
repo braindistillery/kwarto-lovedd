@@ -227,6 +227,8 @@ set_board = function(i)
 end
 
 
+local dpi_scale
+
 local function action(k)
 	if type(k) == type(0) then
 		-- a piece is possibly on the move
@@ -301,6 +303,7 @@ local function action(k)
 			-- just be thankful for string.byte('x') being even
 		stock[k] = k
 		local x, y = unpack(coord[k])
+		x = math.floor(x*dpi_scale)
 		ckeys[x][y] = k
 		_z = k
 		return
@@ -364,6 +367,8 @@ function love.load(a)
 	local G = love.graphics
 	G.setBackgroundColor(1.0, 1.0, 1.0, 1.0)
 
+	dpi_scale = love.window.getDPIScale()
+
 	-- images, coordinates and static stock elements (unaffected by reset)
 	local _im = function(n)
 		return table.concat({'images', string.format('%s.png', n)}, osep)
@@ -378,6 +383,9 @@ function love.load(a)
 		u = 50
 		x, y = u*(1+16+1), u*(1+4+1+1+1) + 40*2
 	end
+	x = x/dpi_scale
+	y = y/dpi_scale
+	u = u/dpi_scale
 	love.window.setMode(x, y, { borderless=true })
 	local h = u/2
 	local s = u/dsize
@@ -431,6 +439,7 @@ function love.load(a)
 	coord.x = nil
 	for k, z in pairs(coord) do
 		local x, y = unpack(z)
+		x = math.floor(x*dpi_scale)
 		local t = ckeys[x] or {}
 		t[y] = k
 		ckeys[x] = t
@@ -463,6 +472,7 @@ function love.mousereleased(x, y, button)
 	local u, h, l = dimen_unit, dimen_half, dimen_left
 	x = fidth and math.floor((x - l)/u)*u + l + h or math.floor((x + h)/u)*u
 		-- same result, less math for fit hi (l == h == u/2)
+	x = math.floor(x*dpi_scale)
 	for v, k in pairs(ckeys[x] or {}) do
 		if stock[k] and math.abs(v - y) < h then
 			return action(k)
