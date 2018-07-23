@@ -44,7 +44,7 @@ function love.conf(t)
 	m.window	= true
  --]]
 
-	t.version		= '0.10.2'
+	t.version		= '11.1'
 	t.accelerometerjoystick	= false
 
 	w.title		= 'kwarto'

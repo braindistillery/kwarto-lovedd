@@ -80,12 +80,12 @@ local setup = function()
 		-- _must_ be called before kwarto_solve
 	if masks == 0 then
 		for i = 1, 16 do
-			alpha[-i] = 255
+			alpha[-i] = 1.0
 		end
 	else
 		local m = masks
 		for i = 1, 16 do
-			alpha[-i] = stock[-i] ~= 0 and bit.band(m, 1) == 0 and 85 or 255
+			alpha[-i] = stock[-i] ~= 0 and bit.band(m, 1) == 0 and .3 or 1.0
 			m = bit.rshift(m, 1)
 		end
 	end
@@ -362,7 +362,7 @@ function love.load(a)
 	hex[0] = '.'
 
 	local G = love.graphics
-	G.setBackgroundColor(255, 255, 225, 128)
+	G.setBackgroundColor(1.0, 1.0, 1.0, 1.0)
 
 	-- images, coordinates and static stock elements (unaffected by reset)
 	local _im = function(n)
@@ -434,11 +434,11 @@ function love.load(a)
 		local t = ckeys[x] or {}
 		t[y] = k
 		ckeys[x] = t
-		alpha[k] = 255
+		alpha[k] = 1.0
 	end
 	coord.x = coord.y
 	stock.x = nil
-	alpha.x = 255
+	alpha.x = 1.0
 
 	math.randomseed(os.time())
 	reset()
@@ -477,10 +477,10 @@ function love.draw()
 	local o = dimen_offs
 	for k, i in pairs(stock) do
 		local x, y = unpack(coord[k])
-		G.setColor(255, 255, 255, alpha[k])
+		G.setColor(1.0, 1.0, 1.0, alpha[k])
 		G.draw(image[i], x, y, 0, s, s, o, o)
 	end
-	G.setColor(255, 255, 255, 255)
+	G.setColor(1.0, 1.0, 1.0, 1.0)
 	love.timer.sleep(.10)  -- don't need all 60 fps
 end
 
